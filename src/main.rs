@@ -10,6 +10,7 @@ mod appmain;
 mod listitem;
 mod utils;
 mod ui;
+mod input;
 
 fn main() -> Result<(), io::Error>  {
     enable_raw_mode()?;

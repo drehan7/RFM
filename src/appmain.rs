@@ -8,6 +8,8 @@ pub struct MainApp<'a> {
     pub start_path: PathBuf,
     pub list_items: listitem::ListItems,
     pub show_popup: bool,
+    pub show_help: bool,
+    pub add_file_popup: bool,
 }
 
 impl<'a> MainApp<'a> {
@@ -31,5 +33,7 @@ impl<'a> MainApp<'a> {
             start_path,
             list_items: listitem::ListItems::from_items(l),
             show_popup: false,
+            show_help: false,
+            add_file_popup: false,
         } }
 }

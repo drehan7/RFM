@@ -54,8 +54,4 @@ impl ListItems {
 
         self.state.select(Some(idx));
     }
-
-    pub fn unselect(&mut self) {
-        self.state.select(None);
-    }
 }

@@ -1,7 +1,8 @@
-use crate::appmain;
+use crate::{appmain, input};
+
 use tui::{
     backend::Backend,
-    widgets::{Block, Borders, BorderType, Clear, List, ListItem},
+    widgets::{Block, Borders, BorderType, Clear, List, ListItem, Paragraph},
     layout::{Layout, Direction, Constraint, Rect},
     style::{Style, Color, Modifier},
     Terminal,
@@ -33,14 +34,14 @@ pub fn ui<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Terminal<B>) {
                     ListItem::new(i.as_ref())
                 ).collect();
             let list = List::new(its)
-                .highlight_style(Style::default().add_modifier(Modifier::ITALIC).fg(Color::Yellow))
+                .highlight_style(Style::default().add_modifier(Modifier::ITALIC | Modifier::BOLD).fg(Color::Yellow))
                 .highlight_symbol("");
             f.render_stateful_widget(list, chunks[1], &mut app.list_items.state);
 
-            let b2 = Block::default()
-                .title("HELP MENU")
-                .borders(Borders::TOP);
-            f.render_widget(b2, chunks[2]);
+            let help_block = Block::default()
+                .title("Press 'h' to toggle Help Menu")
+                .borders(Borders::NONE);
+            f.render_widget(help_block, chunks[2]);
 
             if app.show_popup {
                 let t = match app.list_items.state.selected() {
@@ -58,6 +59,26 @@ pub fn ui<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Terminal<B>) {
                 f.render_widget(Clear, area);
                 f.render_widget(pop, area);
             }
+            
+            if app.show_help {
+                let help_menu = Block::default().title("Help Menu")
+                    .borders(Borders::ALL)
+                    .border_type(BorderType::Rounded);
+                let area = centered_rect(80, 60, f.size());
+                f.render_widget(Clear, area);
+                f.render_widget(help_menu, area);
+            }
+            
+            if app.add_file_popup {
+                let _inp = input::Input::new();
+                let add_file_menu = Block::default()
+                    .title(" Add file? ")
+                    .borders(Borders::ALL)
+                    .border_type(BorderType::Rounded);
+                let area = centered_rect(30, 5, f.size());
+                f.render_widget(Clear, area);
+                f.render_widget(add_file_menu, area);
+            }
         });
 
         if let Event::Key(key) = event::read().unwrap() {
@@ -68,6 +89,9 @@ pub fn ui<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Terminal<B>) {
                             if app.show_popup {
                                 app.show_popup = false;
                             }
+                        },
+                        'h'|'H' => {
+                            app.show_help = !app.show_help;
                         },
                         'j' => {
                             app.list_items.next();
@@ -81,6 +105,9 @@ pub fn ui<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Terminal<B>) {
                         'D' => {
                             app.list_items.go_last();
                         },
+                        'a' => {
+                            app.add_file_popup = !app.add_file_popup;
+                        }
                         _ => {}
                     }
                 },
