@@ -1,5 +1,4 @@
-use std::{io, fs, env};
-use std::path::PathBuf;
+use std::io;
 #[allow(unused_imports)]
 use tui::{
     backend::{Backend, CrosstermBackend},
@@ -14,27 +13,18 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 
+
 mod appmain;
 mod listitem;
+mod utils;
 
 
 fn main() -> Result<(), io::Error>  {
     enable_raw_mode()?;
 
-    let args: Vec<String> = env::args().collect();
-    let arg_path = match args.len() {
-        2 => {
-            PathBuf::from(&args[1])
-        }
-        _ => {
-            PathBuf::from(".")
-        }
-    };
+    let mut terminal = utils::init_terminal()?;
 
-    let mut stdout = io::stdout();
-    let _ = execute!(stdout, EnterAlternateScreen, EnableMouseCapture);
-    let backend = CrosstermBackend::new(stdout);
-    let mut terminal = Terminal::new(backend)?;
+    let arg_path = utils::path_from_args();
     let mut app = appmain::MainApp::new("RFM", arg_path);
 
     let _ = run_app(&mut app, &mut terminal);
