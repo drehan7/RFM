@@ -1,16 +1,17 @@
 use std::io;
+use tui::widgets::Clear;
 #[allow(unused_imports)]
 use tui::{
     backend::{Backend, CrosstermBackend},
     Terminal,
-    widgets::{Widget, Block, Borders, List, ListItem, ListState},
+    widgets::{Widget, Block, Borders, BorderType, List, ListItem, ListState},
     layout::{Layout, Constraint, Direction, Rect},
     style::{Style, Modifier, Color},
 };
 use crossterm::{
-    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
+    event::{self, DisableMouseCapture, Event, KeyCode},
     execute,
-    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+    terminal::{disable_raw_mode, enable_raw_mode, LeaveAlternateScreen},
 };
 
 
@@ -70,6 +71,23 @@ fn run_app<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Terminal<B>) -
                 .highlight_style(Style::default().add_modifier(Modifier::BOLD).fg(Color::Yellow))
                 .highlight_symbol("~> ");
             f.render_stateful_widget(list, chunks[1], &mut app.list_items.state);
+
+            if app.show_popup {
+                let t = match app.list_items.state.selected() {
+                    None => {
+                        " No Item Selected "
+                    },
+                    Some(s) => {
+                        &app.list_items.items[s]
+                    }
+                };
+                let pop = Block::default().title(t.to_owned() + " (press q to close) ")
+                    .borders(Borders::ALL)
+                    .border_type(BorderType::Rounded);
+                let area = centered_rect(60, 20, f.size());
+                f.render_widget(Clear, area);
+                f.render_widget(pop, area);
+            }
         });
 
         if let Event::Key(key) = event::read()? {
@@ -77,7 +95,9 @@ fn run_app<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Terminal<B>) -
                 KeyCode::Char(c) => {
                     match c {
                         'q' => {
-                            app.should_quit = true;
+                            if app.show_popup {
+                                app.show_popup = false;
+                            }
                         },
                         'j' => {
                             app.list_items.next();
@@ -95,16 +115,45 @@ fn run_app<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Terminal<B>) -
                     }
                 },
                 KeyCode::Esc => {
-                    app.list_items.unselect();
+                    app.should_quit = true;
+                }
+                KeyCode::Enter => {
+                    app.show_popup = true;
                 }
                 _ => {},
             }
+
         }
+
 
         if app.should_quit {
             return Ok(())
         }
     }
+}
 
+fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
+    let layout_popup = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints(
+            [
+                Constraint::Percentage((100 - percent_y) / 2),
+                Constraint::Percentage(percent_y),
+                Constraint::Percentage((100 - percent_y) / 2),
+            ]
+            .as_ref()
+        )
+        .split(r);
+    Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints(
+            [
+                Constraint::Percentage((100 - percent_x) / 2),
+                Constraint::Percentage(percent_x),
+                Constraint::Percentage((100 - percent_x) / 2),
+            ]
+            .as_ref()
+        )
+        .split(layout_popup[1])[1]
 }
 

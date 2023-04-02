@@ -7,6 +7,7 @@ pub struct MainApp<'a> {
     pub should_quit: bool,
     pub start_path: PathBuf,
     pub list_items: listitem::ListItems,
+    pub show_popup: bool,
 }
 
 impl<'a> MainApp<'a> {
@@ -29,5 +30,6 @@ impl<'a> MainApp<'a> {
             should_quit: false,
             start_path,
             list_items: listitem::ListItems::from_items(l),
+            show_popup: false,
         } }
 }
