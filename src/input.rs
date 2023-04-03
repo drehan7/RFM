@@ -1,5 +1,5 @@
 pub struct Input {
-    input: String,
+    pub input: String,
 }
 
 impl Input {

@@ -1,6 +1,7 @@
 use std::{
     io::{Stdout, stdout, Error},
     path::PathBuf,
+    fs::File,
     env,
 };
 use tui::{
@@ -32,4 +33,8 @@ pub fn init_terminal() -> Result<Terminal<CrosstermBackend<Stdout>>, Error>
     let _ = execute!(stdout, EnterAlternateScreen, EnableMouseCapture);
     let backend = CrosstermBackend::new(stdout);
     Terminal::new(backend)
+}
+
+pub fn add_file(file_name: &str) {
+    let _ = File::create(file_name);
 }
