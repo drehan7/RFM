@@ -3,14 +3,17 @@ use crate::{appmain, utils};
 use tui::{
     backend::Backend,
     widgets::{Block, Borders, BorderType, Clear, List, ListItem, Paragraph},
-    layout::{Layout, Direction, Constraint, Rect},
+    layout::{Layout, Direction, Constraint},
     style::{Style, Color, Modifier},
     Terminal,
 };
 use crossterm::event::{self, Event, KeyCode};
 use unicode_width::UnicodeWidthStr;
+#[path ="./centered_rect.rs"]
+mod centered_rect;
 
-pub fn ui<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Terminal<B>) {
+
+pub fn main_layout<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Terminal<B>) {
         let _ = terminal.draw(|f| {
             let chunks = Layout::default()
                 .direction(Direction::Vertical)
@@ -56,7 +59,7 @@ pub fn ui<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Terminal<B>) {
                 let pop = Block::default().title(t.to_owned() + " (press q to close) ")
                     .borders(Borders::ALL)
                     .border_type(BorderType::Rounded);
-                let area = centered_rect(60, 20, f.size());
+                let area = centered_rect::centered(60, 20, f.size());
                 f.render_widget(Clear, area);
                 f.render_widget(pop, area);
             }
@@ -65,7 +68,7 @@ pub fn ui<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Terminal<B>) {
                 let help_menu = Block::default().title("Help Menu")
                     .borders(Borders::ALL)
                     .border_type(BorderType::Rounded);
-                let area = centered_rect(80, 60, f.size());
+                let area = centered_rect::centered(80, 60, f.size());
                 f.render_widget(Clear, area);
                 f.render_widget(help_menu, area);
             }
@@ -74,7 +77,7 @@ pub fn ui<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Terminal<B>) {
                 let add_file_menu = Paragraph::new(app.input.input.as_ref())
                     .block(Block::default().title(" Add file? ").borders(Borders::ALL).border_type(BorderType::Rounded))
                     .style(Style::default().fg(Color::Blue));
-                let area = centered_rect(35, 7, f.size());
+                let area = centered_rect::centered(35, 7, f.size());
                 f.render_widget(Clear, area);
                 f.render_widget(add_file_menu, area);
                 f.set_cursor(area.x + app.input.input.width() as u16 + 1, area.y + 1);
@@ -136,30 +139,4 @@ pub fn ui<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Terminal<B>) {
             }
         }
         }
-}
-
-fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
-    let layout_popup = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints(
-            [
-                Constraint::Percentage((100 - percent_y) / 2),
-                Constraint::Percentage(percent_y),
-                Constraint::Percentage((100 - percent_y) / 2),
-            ]
-            .as_ref()
-        )
-        .split(r);
-
-    Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints(
-            [
-                Constraint::Percentage((100 - percent_x) / 2),
-                Constraint::Percentage(percent_x),
-                Constraint::Percentage((100 - percent_x) / 2),
-            ]
-            .as_ref()
-        )
-        .split(layout_popup[1])[1]
 }
