@@ -2,3 +2,4 @@
 
 Rust powered interactive `ls` program inspired by ViFM and Ranger
 
+Currently in development
