@@ -89,7 +89,7 @@ pub fn ui<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Terminal<B>) {
                     KeyCode::Char(c) => { app.input.add(c); },
                     KeyCode::Esc => { app.add_file_popup = false; },
                     KeyCode::Enter => { 
-                        utils::add_file(&app.input.input);
+                        utils::add_file(app);
                         app.refresh_items();
                     },
                     KeyCode::Backspace => { app.input.delete(); }
@@ -115,9 +115,17 @@ pub fn ui<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Terminal<B>) {
                             }
                         },
                         'j' => { app.list_items.next(); },
-                        'k' => { app.list_items.prev(); }
+                        'k' => { app.list_items.prev(); },
                         'U' => { app.list_items.go_first(); },
                         'D' => { app.list_items.go_last(); },
+                        'd' => {
+                            match app.list_items.state.selected() {
+                                Some(s) => {
+                                    utils::delete_file(app, s);
+                                },
+                                None => {},
+                            };
+                        }
                         _ => {}
                     }
                 },

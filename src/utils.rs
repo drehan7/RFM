@@ -1,7 +1,7 @@
 use std::{
     io::{Stdout, stdout, Error},
     path::PathBuf,
-    fs::File,
+    fs::{File, remove_file},
     env,
 };
 use tui::{
@@ -13,6 +13,7 @@ use crossterm::{
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
+use crate::appmain;
 
 pub fn path_from_args() -> PathBuf {
     let args: Vec<String> = env::args().collect();
@@ -35,6 +36,14 @@ pub fn init_terminal() -> Result<Terminal<CrosstermBackend<Stdout>>, Error>
     Terminal::new(backend)
 }
 
-pub fn add_file(file_name: &str) {
-    let _ = File::create(file_name);
+pub fn add_file(app: &mut appmain::MainApp) {
+    let _ = File::create(&app.input.input);
+    app.input.input.clear();
+    app.add_file_popup = false;
+}
+
+pub fn delete_file(app: &mut appmain::MainApp, idx: usize)  {
+    let selected_file = &app.list_items.items[idx];
+    let _ = remove_file(selected_file);
+    app.refresh_items();
 }
