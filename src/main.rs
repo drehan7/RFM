@@ -42,15 +42,19 @@ fn run_app<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Terminal<B>) -
     Ok(())
 }
 
+// IN PROGRESS:
+// TODO: Confirmation of delete
+// TODO: Overall cleanup and styling
+//  
 // - ---------------------------------------------
 // - ------MVP -----------------------------------
 // - ---------------------------------------------
+// TODO: CLEAN UP EVENT HANDLING!!!!
 // TODO: Help menu (dynamic with custom keymaps)
 // TODO: Show icons for file-type (fran) or color code
 // TODO: Customize colors (fran)
 // TODO: Display contents of folder
 // TODO: Keymaps to do commands
-// TODO: Confirmation of delete
 // TODO: Delete folders; empty and not-empty
 // TODO: Add Directories
 // TODO: Display contents of files
@@ -61,7 +65,6 @@ fn run_app<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Terminal<B>) -
 // TODO: Custom commands
 // TODO: Sym links
 // TODO: Movement across directories
-// TODO: Overall cleanup and styling
 
 
 
