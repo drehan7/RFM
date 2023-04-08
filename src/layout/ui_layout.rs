@@ -3,7 +3,7 @@ use tui::{
     Frame,
     backend::Backend,
     widgets::{Block, Borders, BorderType, Clear, List, ListItem, Paragraph},
-    layout::{Layout, Direction, Constraint},
+    layout::{Layout, Direction, Constraint, Alignment},
     style::{Style, Color, Modifier},
     Terminal,
 };
@@ -110,7 +110,7 @@ pub fn main_layout<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Termin
                     KeyCode::Char(c) => {
                         match c {
                             'y' => {
-                                let idx = match app.list_items.state.selected() {
+                                let _ = match app.list_items.state.selected() {
                                     Some(idx) => {
                                         utils::delete_file(app, idx);
                                         app.show_confirmation = false;
@@ -168,12 +168,15 @@ fn confirm_layout<B: Backend>(is_deleting: bool, app: &mut appmain::MainApp, f: 
 
         let idx = app.list_items.state.selected().unwrap();
         let file_name = get_file_name(app, idx);
-        let text: String = format!("About to delete file: {} Are you sure?", file_name);
-        let area = centered_rect::centered(40, 20, f.size());
+        let text: String = format!("\nAbout to delete `{}` | Are you sure?\n(y/n)", file_name);
+        let area = centered_rect::centered(25, 9, f.size());
         let confirmation_window = Paragraph::new(text.to_owned())
+            .alignment(Alignment::Center)
             .block(Block::default()
                 .borders(Borders::ALL)
-                .title("Confirmation Window. Press y to confirm. Any key to escape.")
+                .border_type(BorderType::Rounded)
+                .title("Confirm Action")
+                .title_alignment(Alignment::Center)
                 .style(Style::default().fg(Color::Red)));
         
         f.render_widget(Clear, area);
