@@ -158,6 +158,26 @@ pub fn main_layout<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Termin
 
 }
 
+// If file is selected, then show preview of contents for now
+// If directory show files in dir.
+// If Sym: not sure yet
+fn select_item_popup<B: Backend>(app: &mut appmain::MainApp, f: &mut Frame<B>) {
+    let item_str: String = match app.list_items.state.selected() {
+        Some(s) => {
+            get_file_name(app, s)
+        }
+        None => { String::from(" No Item Selected ")}
+    };
+
+    let popup_rect = Block::default()
+        .title(item_str + " | Press Esc to close ")
+        .borders(Borders::ALL)
+        .border_type(BorderType::Rounded);
+    let area = centered_rect::centered(60, 20, f.size());
+    f.render_widget(Clear, area);
+    f.render_widget(popup_rect, area);
+}
+
 fn add_file_layout<B: Backend>(app: &mut appmain::MainApp, f: &mut Frame<B>) {
     let add_file_menu = Paragraph::new(app.input.input.as_ref())
         .alignment(Alignment::Center)

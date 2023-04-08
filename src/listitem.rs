@@ -12,6 +12,20 @@ pub enum FileType {
     // ZIP,
 }
 
+impl FileType {
+    fn is_dir(&self) -> bool {
+        return true;
+    }
+
+    fn is_sym_link(&self) -> bool {
+        return true;
+    }
+
+    fn is_file(&self) -> bool {
+        return true;
+    }
+}
+
 pub fn get_file_type(entry_ref: &DirEntry) -> FileType {
     let ret: FileType;
     let f_type = entry_ref.metadata().unwrap().file_type();
