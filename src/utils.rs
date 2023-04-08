@@ -54,8 +54,8 @@ pub fn get_file_name(app: &mut appmain::MainApp, idx: usize) -> String {
 pub fn get_file_type(file_type: &listitem::FileType) -> String {
     let mut ret: String = String::from("");
     match file_type {
-        listitem::FileType::DIRECTORY => { ret = String::from("Directory") },
-        listitem::FileType::FILE => { ret = String::from("File") },
+        listitem::FileType::DIRECTORY => { ret = String::from("\u{1f4c1}").into() },
+        listitem::FileType::FILE => { ret = String::from("\u{1f5ce}").into()  },
         listitem::FileType::SYMLINK => { ret = String::from("Symbolic Link") },
         _ => {}
     };

@@ -26,7 +26,6 @@ impl<'a> MainApp<'a> {
             let file_type: listitem::FileType = listitem::get_file_type(&e);
 
             l.insert(file_name, file_type);
-
         }
 
         MainApp {

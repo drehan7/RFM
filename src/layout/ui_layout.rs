@@ -38,7 +38,7 @@ pub fn main_layout<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Termin
             let mut its: Vec<ListItem> = vec![];
             for (file, _type) in app.list_items.items.iter() {
                 // its.push(ListItem::new(file.to_owned()));
-                let file_string: String = format!("{} {}", file.to_owned(), get_file_type(_type).to_owned());
+                let file_string: String = format!("{}  {}", get_file_type(_type).to_owned(), file.to_owned());
                 // file.to_owned() + get_file_type(_type);
                 its.push(ListItem::new(file_string));
             }
