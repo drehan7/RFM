@@ -18,7 +18,7 @@ pub fn main_layout<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Termin
         let _ = terminal.draw(|f| {
             let chunks = Layout::default()
                 .direction(Direction::Vertical)
-                .horizontal_margin(2)
+                .horizontal_margin(5)
                 .vertical_margin(1)
                 .constraints(
                     [
@@ -37,13 +37,12 @@ pub fn main_layout<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Termin
 
             let mut its: Vec<ListItem> = vec![];
             for (file, _type) in app.list_items.items.iter() {
-                // its.push(ListItem::new(file.to_owned()));
                 let file_string: String = format!("{}  {}", get_file_type(_type).to_owned(), file.to_owned());
-                // file.to_owned() + get_file_type(_type);
                 its.push(ListItem::new(file_string));
             }
             let list = List::new(its)
-                .highlight_style(Style::default().add_modifier(Modifier::ITALIC | Modifier::BOLD).fg(Color::Yellow))
+                .highlight_style(Style::default().add_modifier(Modifier::BOLD | Modifier::ITALIC | Modifier::UNDERLINED)
+                    .fg(Color::White))
                 .highlight_symbol("");
             f.render_stateful_widget(list, chunks[1], &mut app.list_items.state);
 
