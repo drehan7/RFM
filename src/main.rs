@@ -6,10 +6,11 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, LeaveAlternateScreen},
 };
 
+
 mod appmain;
 mod listitem;
 mod utils;
-mod ui;
+mod layout;
 mod input;
 
 fn main() -> Result<(), io::Error>  {
@@ -32,7 +33,7 @@ fn main() -> Result<(), io::Error>  {
 
 fn run_app<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Terminal<B>) -> io::Result<()> {
     loop {
-        let _ = ui::ui(app, terminal);
+        let _ = layout::ui_layout::main_layout(app, terminal);
         if app.should_quit {
             break;
         }
@@ -41,6 +42,28 @@ fn run_app<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Terminal<B>) -
     Ok(())
 }
 
-// TODO: Help menu
+// IN PROGRESS:
+// TODO: Overall cleanup and styling
 // TODO: Display contents of folder
+//  
+// - ---------------------------------------------
+// - ------MVP -----------------------------------
+// - ---------------------------------------------
+// TODO: CLEAN UP EVENT HANDLING!!!!
+// TODO: Help menu (dynamic with custom keymaps)
+// TODO: Customize colors (fran)
 // TODO: Keymaps to do commands
+// TODO: Delete folders; empty and not-empty
+// TODO: Add Directories
+// TODO: Display contents of files
+// TODO: Decompression of archives
+// TODO: Moving and copying
+// TODO: Customize keymaps
+// TODO: Search feature
+// TODO: Custom commands
+// TODO: Sym links
+// TODO: Movement across directories
+
+// --------- DONE -----------------------
+// TODO: Confirmation of delete
+// TODO: Show icons for file-type (fran) or color code

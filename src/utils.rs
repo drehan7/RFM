@@ -6,14 +6,14 @@ use std::{
 };
 use tui::{
     Terminal,
-    backend::{Backend, CrosstermBackend},
+    backend::CrosstermBackend,
 };
 use crossterm::{
-    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
+    event::EnableMouseCapture,
     execute,
-    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+    terminal::EnterAlternateScreen,
 };
-use crate::appmain;
+use crate::{appmain, listitem};
 
 pub fn path_from_args() -> PathBuf {
     let args: Vec<String> = env::args().collect();
@@ -42,8 +42,31 @@ pub fn add_file(app: &mut appmain::MainApp) {
     app.add_file_popup = false;
 }
 
+pub fn get_file_name(app: &mut appmain::MainApp, idx: usize) -> String {
+    let items = &app.list_items.items;
+    let mut l = vec![];
+    for key in items.keys() {
+        l.push(key);
+    }
+    l[idx].to_owned()
+}
+
+pub fn get_file_type(file_type: &listitem::FileType) -> String {
+
+    let ret = match file_type {
+        listitem::FileType::NONE => {  String::from("\u{2753}").into() },
+        listitem::FileType::DIRECTORY => {  String::from("\u{1f4c1}").into() },
+        listitem::FileType::FILE => {  String::from("\u{1f5ce}").into()  },
+        listitem::FileType::SYMLINK => {  String::from("\u{1f517}").into() },
+    };
+
+    ret
+}
+
 pub fn delete_file(app: &mut appmain::MainApp, idx: usize)  {
-    let selected_file = &app.list_items.items[idx];
+    // let item_keys: &Vec<_>= &app.list_items.items.into_keys().collect();
+
+    let selected_file = get_file_name(app, idx);
     let _ = remove_file(selected_file);
     app.refresh_items();
 }

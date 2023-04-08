@@ -17,11 +17,7 @@ impl Input {
         self.input.pop();
     }
 
-    pub fn clear(&mut self) {
-        self.input.clear();
-    }
-}
-
-fn main() {
-    println!("ehllow");
+    // pub fn clear(&mut self) {
+    //     self.input.clear();
+    // }
 }

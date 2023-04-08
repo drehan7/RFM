@@ -1,12 +1,50 @@
 use tui::widgets::ListState;
+use std::{
+    collections::HashMap,
+    fs::DirEntry
+};
+
+pub enum FileType {
+    NONE,
+    FILE,
+    DIRECTORY,
+    SYMLINK,
+    // ZIP,
+}
+
+impl FileType {
+    fn is_dir(&self) -> bool {
+        return true;
+    }
+
+    fn is_sym_link(&self) -> bool {
+        return true;
+    }
+
+    fn is_file(&self) -> bool {
+        return true;
+    }
+}
+
+pub fn get_file_type(entry_ref: &DirEntry) -> FileType {
+    let ret: FileType;
+    let f_type = entry_ref.metadata().unwrap().file_type();
+    if f_type.is_dir() { ret = FileType::DIRECTORY }
+    else if f_type.is_file() { ret = FileType::FILE }
+    else if f_type.is_symlink() { ret = FileType::SYMLINK }
+    else { ret = FileType::NONE }
+
+    ret
+}
 
 pub struct ListItems {
-    pub items: Vec<String>,
+    // pub items: Vec<String>,
+    pub items: HashMap<String, FileType>,
     pub state: ListState,
 }
 
 impl ListItems {
-    pub fn from_items(items: Vec<String>) -> ListItems {
+    pub fn from_items(items: HashMap<String, FileType>) -> ListItems {
         ListItems {
             items,
             state: ListState::default(),
