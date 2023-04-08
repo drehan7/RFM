@@ -78,13 +78,7 @@ pub fn main_layout<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Termin
             }
             
             if app.add_file_popup {
-                let add_file_menu = Paragraph::new(app.input.input.as_ref())
-                    .block(Block::default().title(" Add file? ").borders(Borders::ALL).border_type(BorderType::Rounded))
-                    .style(Style::default().fg(Color::Blue));
-                let area = centered_rect::centered(35, 7, f.size());
-                f.render_widget(Clear, area);
-                f.render_widget(add_file_menu, area);
-                f.set_cursor(area.x + app.input.input.width() as u16 + 1, area.y + 1);
+                add_file_layout(app, f);
                 
             }
             
@@ -97,7 +91,7 @@ pub fn main_layout<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Termin
             if app.add_file_popup {
                 match key.code {
                     KeyCode::Char(c) => { app.input.add(c); },
-                    KeyCode::Esc => { app.add_file_popup = false; },
+                    KeyCode::Esc => { app.add_file_popup = false; app.input.input.clear(); },
                     KeyCode::Backspace => { app.input.delete(); },
                     KeyCode::Enter => { 
                         utils::add_file(app);
@@ -162,6 +156,21 @@ pub fn main_layout<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Termin
         }
     }
 
+}
+
+fn add_file_layout<B: Backend>(app: &mut appmain::MainApp, f: &mut Frame<B>) {
+    let add_file_menu = Paragraph::new(app.input.input.as_ref())
+        .alignment(Alignment::Center)
+        .block(Block::default().title(" Add file: | Esc to exit")
+            .borders(Borders::ALL)
+            .border_type(BorderType::Rounded)
+            .title_alignment(Alignment::Left))
+        .style(Style::default().fg(Color::Blue));
+    let area = centered_rect::centered(35, 7, f.size());
+    f.render_widget(Clear, area);
+    f.render_widget(add_file_menu, area);
+    let cursor_start = (area.width / 2) + ((app.input.input.width() as u16 + 1) / 2) + area.x;
+    f.set_cursor(cursor_start , area.y + 1);
 }
 
 fn confirm_layout<B: Backend>(is_deleting: bool, app: &mut appmain::MainApp, f: &mut Frame<B>) {
