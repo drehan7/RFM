@@ -6,12 +6,12 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, LeaveAlternateScreen},
 };
 
-
 mod appmain;
 mod listitem;
 mod utils;
 mod layout;
 mod input;
+
 
 fn main() -> Result<(), io::Error>  {
     enable_raw_mode()?;
@@ -64,6 +64,7 @@ fn run_app<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Terminal<B>) -
 // TODO: Custom commands
 // TODO: Sym links
 // TODO: Movement across directories
+// TODO: Error Handling
 
 // --------- DONE -----------------------
 // TODO: Confirmation of delete

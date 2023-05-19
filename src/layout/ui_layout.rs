@@ -173,14 +173,16 @@ fn add_file_layout<B: Backend>(app: &mut appmain::MainApp, f: &mut Frame<B>) {
             .border_type(BorderType::Rounded)
             .title_alignment(Alignment::Left))
         .style(Style::default().fg(Color::Blue));
+
     let area = centered_rect::centered(35, 7, f.size());
     f.render_widget(Clear, area);
     f.render_widget(add_file_menu, area);
+
     let cursor_start = (area.width / 2) + ((app.input.input.width() as u16 + 1) / 2) + area.x;
     f.set_cursor(cursor_start , area.y + 1);
 }
 
-fn confirm_layout<B: Backend>(is_deleting: bool, app: &mut appmain::MainApp, f: &mut Frame<B>) {
+fn confirm_layout<B: Backend>(_is_deleting: bool, app: &mut appmain::MainApp, f: &mut Frame<B>) {
 
         let idx = app.list_items.state.selected().unwrap();
         let file_name = get_file_name(app, idx);

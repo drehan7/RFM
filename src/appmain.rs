@@ -43,16 +43,16 @@ impl<'a> MainApp<'a> {
 
     pub fn refresh_items(&mut self) {
         let dir = PathBuf::from(&self.start_path);
-        let mut l = HashMap::new();
+        let mut map = HashMap::new();
         for entry in fs::read_dir(dir).unwrap() {
             let e = &entry.unwrap();
             let file_name = e.file_name().to_str().unwrap().to_owned();
             let file_type: listitem::FileType = listitem::get_file_type(&e);
 
-            l.insert(file_name, file_type);
+            map.insert(file_name, file_type);
 
         }
 
-        self.list_items = listitem::ListItems::from_items(l);
+        self.list_items = listitem::ListItems::from_items(map);
     }
 }

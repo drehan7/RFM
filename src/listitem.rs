@@ -12,15 +12,19 @@ pub enum FileType {
     // ZIP,
 }
 
+// Future use
 impl FileType {
+    #[allow(dead_code)]
     fn is_dir(&self) -> bool {
         return true;
     }
 
+    #[allow(dead_code)]
     fn is_sym_link(&self) -> bool {
         return true;
     }
 
+    #[allow(dead_code)]
     fn is_file(&self) -> bool {
         return true;
     }
