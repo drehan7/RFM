@@ -52,20 +52,7 @@ pub fn main_layout<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Termin
             f.render_widget(help_block, chunks[2]);
 
             if app.show_popup {
-                let t: String = match app.list_items.state.selected() {
-                    None => {
-                        String::from(" No Item Selected ")
-                    },
-                    Some(s) => {
-                        get_file_name(app, s)
-                    }
-                };
-                let pop = Block::default().title(t + " (press q to close) ")
-                    .borders(Borders::ALL)
-                    .border_type(BorderType::Rounded);
-                let area = centered_rect::centered(60, 20, f.size());
-                f.render_widget(Clear, area);
-                f.render_widget(pop, area);
+                select_item_popup(app, f);
             }
             
             if app.show_help {
@@ -173,7 +160,7 @@ fn select_item_popup<B: Backend>(app: &mut appmain::MainApp, f: &mut Frame<B>) {
         .title(item_str + " | Press Esc to close ")
         .borders(Borders::ALL)
         .border_type(BorderType::Rounded);
-    let area = centered_rect::centered(60, 20, f.size());
+    let area = centered_rect::centered(80, 30, f.size());
     f.render_widget(Clear, area);
     f.render_widget(popup_rect, area);
 }

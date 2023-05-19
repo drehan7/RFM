@@ -49,6 +49,7 @@ fn run_app<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Terminal<B>) -
 // - ---------------------------------------------
 // - ------MVP -----------------------------------
 // - ---------------------------------------------
+// TODO: Add computer memory information at bottom
 // TODO: CLEAN UP EVENT HANDLING!!!!
 // TODO: Help menu (dynamic with custom keymaps)
 // TODO: Customize colors (fran)
