@@ -3,7 +3,11 @@ use std::{
     path::PathBuf,
     collections::HashMap
 };
-use crate::{listitem, input};
+
+use crate::{
+    listitem,
+    input
+};
 
 pub struct MainApp<'a> {
     pub title: &'a str,

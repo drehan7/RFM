@@ -64,6 +64,7 @@ fn run_app<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Terminal<B>) -
 // TODO: Custom commands
 // TODO: Sym links
 // TODO: Movement across directories
+// TODO: Sorting functionality
 
 // --------- DONE -----------------------
 // TODO: Confirmation of delete

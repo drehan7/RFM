@@ -68,7 +68,6 @@ impl ListItems {
                 } else {
                     idx + 1
                 }
-
             },
             None => {
                 0
