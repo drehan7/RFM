@@ -13,13 +13,22 @@ mod utils;
 mod layout;
 mod input;
 
+use layout::ui_layout;
+
 fn main() -> Result<(), io::Error>  {
+    /*
+       setup terminal
+       enable raw mode which ensures that user input is passed directly to our application
+       without the terminal driver intercepting and carrying out processing of its own
+    */
     enable_raw_mode()?;
     let mut terminal = utils::init_terminal()?;
     let arg_path = utils::path_from_args();
     let mut app = appmain::MainApp::new("RFM", arg_path);
     let _ = run_app(&mut app, &mut terminal);
 
+    
+    // Restore the terminal
     disable_raw_mode()?;
     let _ = execute!(
         terminal.backend_mut(),
@@ -31,9 +40,10 @@ fn main() -> Result<(), io::Error>  {
     Ok(())
 }
 
+
 fn run_app<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Terminal<B>) -> io::Result<()> {
     loop {
-        let _ = layout::ui_layout::main_layout(app, terminal);
+        let _ = ui_layout::main_layout(app, terminal);
         if app.should_quit {
             break;
         }
