@@ -1,5 +1,7 @@
-use crate::{appmain, utils::{self, get_file_name, get_file_type}};
-
+use crate::{
+    appmain::MainApp,
+    utils::{self, get_file_name, get_file_type}
+};
 use tui::{
     Frame,
     backend::Backend,
@@ -15,50 +17,14 @@ use unicode_width::UnicodeWidthStr;
 mod centered_rect;
 
 
-pub fn main_layout<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Terminal<B>) {
+pub fn main_layout<B: Backend>(app: &mut MainApp, terminal: &mut Terminal<B>) {
     let _ = terminal.draw(|f| {
-        let chunks = Layout::default()
-            .direction(Direction::Vertical)
-            .horizontal_margin(5)
-            .vertical_margin(1)
-            .constraints(
-                [
-                    Constraint::Percentage(5),
-                    Constraint::Percentage(94),
-                    Constraint::Percentage(1),
-                ].as_ref()
-            )
-            .split(f.size());
-
-
-        let block = Block::default()
-            .title(app.title)
-            .borders(Borders::TOP)
-            .style(Style::default().fg(Color::Yellow));
-
-        let mut its: Vec<ListItem> = vec![];
-        for (file, _type) in app.list_items.items.iter() {
-            let file_string: String = format!("{}  {}", get_file_type(_type).to_owned(), file.to_owned());
-            its.push(ListItem::new(file_string));
-        }
-        let list = List::new(its)
-            .highlight_style(Style::default().add_modifier(Modifier::BOLD | Modifier::ITALIC | Modifier::UNDERLINED)
-                .fg(Color::White))
-            .highlight_symbol("");
-
-        let help_block = Block::default()
-            .title("Press 'h' to toggle Help Menu | Press q to exit")
-            .borders(Borders::NONE);
-
-
-        f.render_widget(block, chunks[0]);
-        f.render_stateful_widget(list, chunks[1], &mut app.list_items.state);
-        f.render_widget(help_block, chunks[2]);
-
+        construct_main_layout(app, f);
         handle_app_flags(app, f);
     });
 
     if let Event::Key(key) = event::read().unwrap() {
+        // TODO: put a handle function here
         if app.add_file_popup {
             match key.code {
                 KeyCode::Char(c) => { app.input.add(c); },
@@ -91,48 +57,93 @@ pub fn main_layout<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Termin
 
         }
         else {
-
-        match key.code {
-            KeyCode::Char(c) => {
-                match c {
-                    'h'|'H' => {
-                        if app.add_file_popup || app.show_popup { return; }
-                        app.show_help = !app.show_help;
-                    },
-                    'a' => {
-                        if app.show_help || app.show_popup { return; }
-                        app.add_file_popup = !app.add_file_popup;
-                    }
-                    'q' => {
-                        if app.show_popup { app.show_popup = false; }
-                        else {
-                            app.should_quit = true; 
-                        }
-                    },
-                    'j' => { app.list_items.next(); },
-                    'k' => { app.list_items.prev(); },
-                    'U' => { app.list_items.go_first(); },
-                    'D' => { app.list_items.go_last(); },
-                    'd' => {
-                        app.show_confirmation = true;
-                    }
-                    _ => {}
-                }
-            },
-            KeyCode::Esc => { if app.show_popup { app.show_popup = false; } }
-            KeyCode::Enter => { app.show_popup = true; }
-            KeyCode::Tab => { app.should_quit = true; }
-            _ => {},
+            handle_event(app, key.code);
         }
     }
+
 }
+
+fn handle_event(app: &mut MainApp, key: KeyCode) {
+    match key {
+        KeyCode::Char(c) => {
+            match c {
+                'h'|'H' => {
+                    if app.add_file_popup || app.show_popup { return; }
+                    app.show_help = !app.show_help;
+                },
+                'a' => {
+                    if app.show_help || app.show_popup { return; }
+                    app.add_file_popup = !app.add_file_popup;
+                }
+                'q' => {
+                    if app.show_popup { app.show_popup = false; }
+                    else {
+                        app.should_quit = true; 
+                    }
+                },
+                'j' => { app.list_items.next(); },
+                'k' => { app.list_items.prev(); },
+                'U' => { app.list_items.go_first(); },
+                'D' => { app.list_items.go_last(); },
+                'd' => {
+                    app.show_confirmation = true;
+                }
+                _ => {}
+            }
+        },
+        KeyCode::Esc => { if app.show_popup { app.show_popup = false; } }
+        KeyCode::Enter => { app.show_popup = true; }
+        KeyCode::Tab => { app.should_quit = true; }
+        _ => {},
+    }
+
+}
+
+fn construct_main_layout<B: Backend> (app: &mut MainApp, f: &mut Frame<B>) {
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .horizontal_margin(5)
+        .vertical_margin(1)
+        .constraints(
+            [
+                Constraint::Percentage(5),
+                Constraint::Percentage(94),
+                Constraint::Percentage(1),
+            ].as_ref()
+        )
+        .split(f.size());
+
+
+    let block = Block::default()
+        .title(app.title)
+        .borders(Borders::TOP)
+        .style(Style::default().fg(Color::Yellow));
+
+    let mut its: Vec<ListItem> = vec![];
+    for (file, _type) in app.list_items.items.iter() {
+        let file_string: String = format!("{}  {}", get_file_type(_type).to_owned(), file.to_owned());
+        its.push(ListItem::new(file_string));
+    }
+    let list = List::new(its)
+        .highlight_style(Style::default().add_modifier(Modifier::BOLD | Modifier::ITALIC | Modifier::UNDERLINED)
+            .fg(Color::White))
+        .highlight_symbol("");
+
+    let help_block = Block::default()
+        .title("Press 'h' to toggle Help Menu | Press q to exit")
+        .borders(Borders::NONE);
+
+
+    f.render_widget(block, chunks[0]);
+    f.render_stateful_widget(list, chunks[1], &mut app.list_items.state);
+    f.render_widget(help_block, chunks[2]);
 
 }
 
 // If file is selected, then show preview of contents for now
 // If directory show files in dir.
 // If Sym: not sure yet
-fn select_item_popup<B: Backend>(app: &mut appmain::MainApp, f: &mut Frame<B>) {
+fn select_item_popup<B: Backend>(app: &mut MainApp, f: &mut Frame<B>) {
     let item_str: String = match app.list_items.state.selected() {
         Some(s) => {
             get_file_name(app, s)
@@ -149,7 +160,7 @@ fn select_item_popup<B: Backend>(app: &mut appmain::MainApp, f: &mut Frame<B>) {
     f.render_widget(popup_rect, area);
 }
 
-fn add_file_layout<B: Backend>(app: &mut appmain::MainApp, f: &mut Frame<B>) {
+fn add_file_layout<B: Backend>(app: &mut MainApp, f: &mut Frame<B>) {
     let add_file_menu = Paragraph::new(app.input.input.as_ref())
         .alignment(Alignment::Center)
         .block(Block::default().title(" Add file: | Esc to exit")
@@ -167,7 +178,7 @@ fn add_file_layout<B: Backend>(app: &mut appmain::MainApp, f: &mut Frame<B>) {
     f.set_cursor(cursor_start , area.y + 1);
 }
 
-fn confirm_layout<B: Backend>(is_deleting: bool, app: &mut appmain::MainApp, f: &mut Frame<B>) {
+fn confirm_layout<B: Backend>(is_deleting: bool, app: &mut MainApp, f: &mut Frame<B>) {
     let idx = app.list_items.state.selected().unwrap();
     let file_name = get_file_name(app, idx);
 
@@ -188,7 +199,7 @@ fn confirm_layout<B: Backend>(is_deleting: bool, app: &mut appmain::MainApp, f: 
     f.render_widget(confirmation_window, area);
 }
 
-fn handle_app_flags<B: Backend>(app: &mut appmain::MainApp, f: &mut Frame<B>) {
+fn handle_app_flags<B: Backend>(app: &mut MainApp, f: &mut Frame<B>) {
     if app.show_popup {
         select_item_popup(app, f);
     }
