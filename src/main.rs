@@ -1,9 +1,7 @@
 use std::io;
-use tui::{ backend::Backend, Terminal };
+use tui::{ backend::Backend, layout::{Constraint, Direction, Layout}, style::{Color, Modifier, Style}, widgets::{Block, Borders, List,  ListItem}, Terminal };
 use crossterm::{
-    execute,
-    event::DisableMouseCapture,
-    terminal::{disable_raw_mode, enable_raw_mode, LeaveAlternateScreen},
+    event::{self, DisableMouseCapture, Event, KeyCode}, execute, terminal::{disable_raw_mode, enable_raw_mode, LeaveAlternateScreen}
 };
 
 
@@ -43,7 +41,49 @@ fn main() -> Result<(), io::Error>  {
 
 fn run_app<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Terminal<B>) -> io::Result<()> {
     loop {
-        let _ = ui_layout::main_layout(app, terminal);
+        // Come up with case for layouts to render
+        let _ = terminal.draw(|f| {
+            ui_layout::main_layout(app, f);
+        });
+
+        // Cleaner function for key events
+        if let Event::Key(key) = event::read().unwrap() {
+        match key.code {
+            KeyCode::Char(c) => {
+                match c {
+                    'h'|'H' => {
+                        app.show_help = !app.show_help;
+                    },
+                    'a' => {
+                        // TESTING try to split the window
+                        //split_window(f, )
+
+
+                        // if app.show_help || app.show_popup { return; }
+                        // app.add_file_popup = !app.add_file_popup;
+                    }
+                    'q' => {
+                        if app.show_popup { app.show_popup = false; }
+                        else {
+                            app.should_quit = true; 
+                        }
+                    },
+                    'j' => { app.list_items.next(); },
+                    'k' => { app.list_items.prev(); },
+                    'U' => { app.list_items.go_first(); },
+                    'D' => { app.list_items.go_last(); },
+                    'd' => {
+                        app.show_confirmation = true;
+                    }
+                    _ => {}
+                }
+            },
+            KeyCode::Esc => { if app.show_popup { app.show_popup = false; } }
+            KeyCode::Enter => { app.show_popup = true; }
+            KeyCode::Tab => { app.should_quit = true; }
+            _ => {},
+        }
+        }
         if app.should_quit {
             break;
         }

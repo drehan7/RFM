@@ -45,6 +45,7 @@ impl<'a> MainApp<'a> {
         } 
     }
 
+    #[warn(dead_code)]
     pub fn refresh_items(&mut self) {
         let dir = PathBuf::from(&self.start_path);
         let mut l = HashMap::new();
