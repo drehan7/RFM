@@ -1,121 +1,66 @@
-use std::io;
-use tui::{ backend::Backend, layout::{Constraint, Direction, Layout}, style::{Color, Modifier, Style}, widgets::{Block, Borders, List,  ListItem}, Terminal };
-use crossterm::{
-    event::{self, DisableMouseCapture, Event, KeyCode}, execute, terminal::{disable_raw_mode, enable_raw_mode, LeaveAlternateScreen}
-};
-
-
-mod appmain;
-mod listitem;
+mod ui;
+mod app;
 mod utils;
-mod layout;
-mod input;
+mod filesystem;
 
-use layout::ui_layout;
+use crossterm::event::{DisableMouseCapture, EnableMouseCapture};
+use crossterm::execute;
+use crossterm::terminal::{ enable_raw_mode, EnterAlternateScreen, disable_raw_mode, LeaveAlternateScreen };
+use ratatui::backend::CrosstermBackend;
+use ratatui::Terminal;
+use std::error::Error;
+use std::io;
+use std::path::PathBuf;
+use std::env::current_dir;
 
-fn main() -> Result<(), io::Error>  {
-    /*
-       setup terminal
-       enable raw mode which ensures that user input is passed directly to our application
-       without the terminal driver intercepting and carrying out processing of its own
-    */
-    enable_raw_mode()?;
-    let mut terminal = utils::init_terminal()?;
-    let arg_path = utils::path_from_args();
-    let mut app = appmain::MainApp::new("RFM", arg_path);
-    let _ = run_app(&mut app, &mut terminal);
+/*
+/*! Main MVP for now:
+*/      - List all entries in cwd.
+        - Selecting File displays contents in split pane
 
+
+        Selecting Dir `cd`s and displays contents
+        Shortcuts to add, remove, rename file/dir
+        Shortcut to 'yank' file and place in another directory
+
+        Cool TODOS:
+            Image support
+            Tree view of filesystem
+            Change permissions
+            Symbolic Links
+            Open file in editor
+*/
+
+
+fn main() -> Result<(), Box<dyn Error>> {
+    // TODO CLI Arguments
     
-    // Restore the terminal
+    enable_raw_mode()?;
+    let mut stderr = io::stderr();
+    execute!(stderr, EnterAlternateScreen, EnableMouseCapture)?;
+
+    let backend = CrosstermBackend::new(stderr);
+    let mut terminal = Terminal::new(backend)?;
+
+    let curr_path = match current_dir() {
+        Ok(_path) => PathBuf::from("src"),
+
+        // Default to current
+        Err(_) => PathBuf::from(".")
+    };
+
+    let mut app = app::App::new("RFM (Rusty File Manager)", &curr_path);
+    app.run(&mut terminal)?;
+
     disable_raw_mode()?;
-    let _ = execute!(
+    execute!(
         terminal.backend_mut(),
         LeaveAlternateScreen,
         DisableMouseCapture,
-    );
+    )?;
     terminal.show_cursor()?;
 
-    Ok(())
-}
-
-
-fn run_app<B: Backend>(app: &mut appmain::MainApp, terminal: &mut Terminal<B>) -> io::Result<()> {
-    loop {
-        // Come up with case for layouts to render
-        let _ = terminal.draw(|f| {
-            ui_layout::main_layout(app, f);
-        });
-
-        // Cleaner function for key events
-        if let Event::Key(key) = event::read().unwrap() {
-        match key.code {
-            KeyCode::Char(c) => {
-                match c {
-                    'h'|'H' => {
-                        app.show_help = !app.show_help;
-                    },
-                    'a' => {
-                        // TESTING try to split the window
-                        //split_window(f, )
-
-
-                        // if app.show_help || app.show_popup { return; }
-                        // app.add_file_popup = !app.add_file_popup;
-                    }
-                    'q' => {
-                        if app.show_popup { app.show_popup = false; }
-                        else {
-                            app.should_quit = true; 
-                        }
-                    },
-                    'j' => { app.list_items.next(); },
-                    'k' => { app.list_items.prev(); },
-                    'U' => { app.list_items.go_first(); },
-                    'D' => { app.list_items.go_last(); },
-                    'd' => {
-                        app.show_confirmation = true;
-                    }
-                    _ => {}
-                }
-            },
-            KeyCode::Esc => { if app.show_popup { app.show_popup = false; } }
-            KeyCode::Enter => { app.show_popup = true; }
-            KeyCode::Tab => { app.should_quit = true; }
-            _ => {},
-        }
-        }
-        if app.should_quit {
-            break;
-        }
-    }
 
     Ok(())
 }
 
-// IN PROGRESS:
-// TODO: Overall cleanup and styling
-// TODO: Display contents of folder
-//  
-// - ---------------------------------------------
-// - ------MVP -----------------------------------
-// - ---------------------------------------------
-// TODO: Add computer memory information at bottom
-// TODO: CLEAN UP EVENT HANDLING!!!!
-// TODO: Help menu (dynamic with custom keymaps)
-// TODO: Customize colors (fran)
-// TODO: Keymaps to do commands
-// TODO: Delete folders; empty and not-empty
-// TODO: Add Directories
-// TODO: Display contents of files
-// TODO: Decompression of archives
-// TODO: Moving and copying
-// TODO: Customize keymaps
-// TODO: Search feature
-// TODO: Custom commands
-// TODO: Sym links
-// TODO: Movement across directories
-// TODO: Sorting functionality
-
-// --------- DONE -----------------------
-// TODO: Confirmation of delete
-// TODO: Show icons for file-type (fran) or color code
