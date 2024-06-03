@@ -49,7 +49,9 @@ fn main() -> Result<(), Box<dyn Error>> {
         Err(_) => PathBuf::from(".")
     };
 
-    let mut app = app::App::new("RFM (Rusty File Manager)", &curr_path);
+    const SCROLL_OFFSET:usize = 15;
+
+    let mut app = app::App::new("RFM (Rusty File Manager)", &curr_path, SCROLL_OFFSET);
     app.run(&mut terminal)?;
 
     disable_raw_mode()?;

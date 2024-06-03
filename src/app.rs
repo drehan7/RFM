@@ -3,6 +3,7 @@ use std::path::PathBuf;
 
 use crossterm::event::{self, Event, KeyCode};
 use ratatui::backend::Backend;
+use ratatui::widgets::ScrollbarState;
 use ratatui::Terminal;
 
 use crate::filesystem::{DirectoryList, SelectedFile};
@@ -25,12 +26,14 @@ pub struct App {
     pub current_path: PathBuf,
     pub curr_path_entries: DirectoryList,
     pub current_selected_file: Option<SelectedFile>,
+    pub file_view_scroll_state: ScrollbarState,
     pub app_view: AppView,
     pub scroll_value: u16,
+    pub scroll_offset: usize,
 }
 
 impl App {
-    pub fn new(title: &str, path: &PathBuf) -> App {
+    pub fn new(title: &str, path: &PathBuf, scroll_offset: usize) -> App {
         let curr_entries = match utils::get_dir_entries(path) {
             Ok(entries) => entries,
             Err(_) => Vec::new()
@@ -44,7 +47,15 @@ impl App {
             current_selected_file: None,
             app_view: AppView::FileTree,
             scroll_value: 0,
+            file_view_scroll_state: ScrollbarState::default(),
+            scroll_offset, 
         }
+    }
+
+    fn update_scroll_state(&mut self, value: usize) {
+        self.scroll_value = value as u16;
+        self.file_view_scroll_state = 
+            self.file_view_scroll_state.position(value);
     }
 
     fn handle_key_event(&mut self) -> Result<(), io::Error>{
@@ -67,8 +78,8 @@ impl App {
                         AppView::FileContent => {
                             match &self.current_selected_file {
                                 Some(f) => {
-                                    if self.scroll_value < f.line_count - 1 {
-                                        self.scroll_value += 1;
+                                    if self.scroll_value < f.line_count - self.scroll_offset as u16{
+                                        self.update_scroll_state((self.scroll_value as usize) + 1);
                                     }
                                 }
                                 None => {}
@@ -84,7 +95,7 @@ impl App {
                         // Scroll file
                         AppView::FileContent => {
                             if self.scroll_value > 0 {
-                                self.scroll_value -= 1;
+                                self.update_scroll_state((self.scroll_value as usize) - 1);
                             }
                         }
                     }
@@ -94,6 +105,8 @@ impl App {
                     match self.current_selected_file {
                         Some(_) => {
                             self.scroll_value = 0;
+                            self.file_view_scroll_state = 
+                                self.file_view_scroll_state.position(self.scroll_value as usize);
                             self.app_view = match self.app_view {
                                 AppView::FileContent => {
                                     AppView::FileTree

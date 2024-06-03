@@ -15,11 +15,17 @@ pub struct SelectedFile {
 
 impl SelectedFile {
     pub fn from_path(path: PathBuf) -> SelectedFile {
-        let vec_contents:Vec<String> = read_to_string(&path)
-            .unwrap()
-            .lines()
-            .map(String::from)
-            .collect();
+        let vec_contents:Vec<String> = match read_to_string(&path) {
+            Ok(read_file) => {
+                read_file
+                    .lines()
+                    .map(String::from)
+                    .collect()
+            }
+            _ => {
+                vec![String::from("")]
+            }
+        };
 
         SelectedFile {
             path: PathBuf::from(path),
@@ -37,6 +43,7 @@ impl DirectoryList {
         }
     }
 
+    #[allow(dead_code)]
     pub fn set_items(&mut self, items: Vec<DirEntry>) {
         self.items = items;
         self.state = ListState::default();
@@ -74,6 +81,7 @@ impl DirectoryList {
         self.state.select(Some(i));
     }
 
+    #[allow(dead_code)]
     pub fn unselect(&mut self) {
         self.state.select(None);
     }

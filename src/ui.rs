@@ -1,8 +1,8 @@
-use std::fs::read_to_string;
-
 use crate::app;
 
-use ratatui::widgets::ListItem;
+use ratatui::layout::Margin;
+use ratatui::symbols::scrollbar;
+use ratatui::widgets::{ListItem, Scrollbar, ScrollbarOrientation, ScrollbarState};
 use ratatui::{
     Frame,
     layout::{Constraint, Layout, Rect},
@@ -11,6 +11,20 @@ use ratatui::{
     text::Text,
 };
 
+fn render_scroll_bar (f: &mut Frame, rect: &Rect, scroll_state: &mut ScrollbarState) {
+    f.render_stateful_widget(
+        Scrollbar::new(ScrollbarOrientation::VerticalRight)
+            .symbols(scrollbar::VERTICAL)
+            .begin_symbol(Some("↑"))
+            .end_symbol(Some("↓"))
+            .style(Style::default().fg(Color::Cyan)),
+        rect.inner(&Margin {
+            vertical: 1,
+            horizontal: 0,
+        }),
+        scroll_state
+    );
+}
 
 fn render_header_block (f: &mut Frame, rect: &Rect, app: &app::App) {
     let title_block = Block::default()
@@ -63,7 +77,13 @@ fn render_main_block(f: &mut Frame, rects: &Vec<Rect>, app: &app::App) {
                     .block(Block::bordered())
                     .scroll((app.scroll_value, 0));
 
+                let mut scroll_state = match (file.line_count as usize) - app.scroll_offset > 0 {
+                    true => {app.file_view_scroll_state.content_length(file.line_count as usize - (app.scroll_offset))}
+                    false => {app.file_view_scroll_state.content_length(file.line_count as usize)}
+                };
+
                 f.render_widget(paragraph, rects[1]);
+                render_scroll_bar(f, &rects[1], &mut scroll_state);
             }
             None => {}
         }
