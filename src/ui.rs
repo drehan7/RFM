@@ -1,4 +1,4 @@
-use crate::{app, utils};
+use crate::{app, utils, syntax};
 
 use std::fs::DirEntry;
 use ratatui::layout::Margin;
@@ -12,7 +12,6 @@ use ratatui::{
     widgets::{ Block, Borders, List, ListDirection, Paragraph },
     text::Text,
 };
-
 
 // Add unicode to entries
 fn displayable_path( entry: &DirEntry ) -> String {
@@ -105,6 +104,12 @@ fn render_main_block(f: &mut Frame, rects: &Vec<Rect>, app: &app::App) {
     if rects.len() > 1 {
         match &app.current_selected_file {
             Some(file) => {
+                match &file.file_ext {
+                    Some(_e) => {
+                    },
+                    None => {}
+                }
+
                 let paragraph = Paragraph::new(file.contents.clone())
                     .style(Style::default().fg(Color::White))
                     .block(Block::bordered())

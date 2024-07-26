@@ -3,6 +3,7 @@ use color_eyre::{config::HookBuilder, eyre};
 
 use crate::tui;
 
+// * Fixes the terminal on panic so nothing looks all jank
 // Replaces standard color_eyre panic & error hooks with ones that replace terminal
 pub fn install_hooks() -> color_eyre::Result<()> {
     let (panic_hook, eyre_hook) = HookBuilder::default().into_hooks();

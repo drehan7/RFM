@@ -31,7 +31,5 @@ pub fn restore() -> io::Result<()> {
         LeaveAlternateScreen,
         DisableMouseCapture,
     )?;
-    // terminal.show_cursor()?;
-
     Ok(())
 }

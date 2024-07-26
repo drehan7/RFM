@@ -4,6 +4,7 @@ mod utils;
 mod filesystem;
 mod errors;
 mod tui;
+mod syntax;
 
 use std::error::Error;
 use std::env;
@@ -12,8 +13,6 @@ use std::path::{PathBuf, Path};
 /*
 /*! Main MVP for now:
 */      
-        - Selecting File displays contents in split pane
-
 
         Selecting Dir `cd`s and displays contents
         Shortcuts to add, remove, rename file/dir

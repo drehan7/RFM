@@ -1,5 +1,6 @@
 use ratatui::widgets::ListState;
-use std::path::{Path, PathBuf};
+use std::path::{Path, PathBuf };
+use std::ffi::OsString;
 use std::{fs::{self, DirEntry, read_to_string}, io};
 
 pub struct DirectoryList {
@@ -10,6 +11,7 @@ pub struct DirectoryList {
 
 pub struct SelectedFile {
     pub path: PathBuf,
+    pub file_ext: Option<OsString>,
     pub contents: String,
     pub line_count: usize,
 }
@@ -41,8 +43,16 @@ impl SelectedFile {
             }
         };
 
+        let ext: Option<OsString> = match path.as_path().extension() {
+            Some(e) => {
+                Some(e.to_owned())
+            },
+            None => None
+        };
+
         SelectedFile {
-            path: PathBuf::from(path),
+            path,
+            file_ext: ext,
             contents: vec_contents.join("\n"),
             line_count: vec_contents.len() as usize,
         }
