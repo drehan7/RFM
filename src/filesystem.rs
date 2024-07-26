@@ -1,16 +1,30 @@
 use ratatui::widgets::ListState;
-use std::path::PathBuf;
-use std::fs::{read_to_string, DirEntry};
+use std::path::{Path, PathBuf};
+use std::{fs::{self, DirEntry, read_to_string}, io};
 
 pub struct DirectoryList {
     pub items: Vec<DirEntry>,
     pub state: ListState,
+    pub path: PathBuf,
 }
 
 pub struct SelectedFile {
     pub path: PathBuf,
     pub contents: String,
-    pub line_count: u16,
+    pub line_count: usize,
+}
+
+pub fn get_dir_entries (path: &Path) -> Result<Vec<DirEntry>, io::Error> {
+    match fs::read_dir(path) {
+        Ok(entries) => {
+            return entries
+                .map(|m| m)
+                .collect::<Result<Vec<DirEntry>, io::Error>>();
+        }
+        Err(e) => {
+            return Err(e);
+        }
+    };
 }
 
 impl SelectedFile {
@@ -23,25 +37,34 @@ impl SelectedFile {
                     .collect()
             }
             _ => {
-                vec![String::from("")]
+                vec![String::from("\n")]
             }
         };
 
         SelectedFile {
             path: PathBuf::from(path),
             contents: vec_contents.join("\n"),
-            line_count: vec_contents.len() as u16,
+            line_count: vec_contents.len() as usize,
         }
     }
 }
 
 impl DirectoryList {
-    pub fn new(items: Vec<DirEntry>) -> DirectoryList {
+    pub fn new(path: &PathBuf) -> DirectoryList {
+        let curr_entries = match get_dir_entries(path) {
+            Ok(entries) => {
+                entries
+            },
+            Err(_) => Vec::new()
+        };
+
         DirectoryList {
-            items,
-            state: ListState::default()
+            items: curr_entries,
+            state: ListState::default(),
+            path: PathBuf::from("DAWUD TEST")
         }
     }
+
 
     #[allow(dead_code)]
     pub fn set_items(&mut self, items: Vec<DirEntry>) {
