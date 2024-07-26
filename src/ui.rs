@@ -110,18 +110,20 @@ fn render_main_block(f: &mut Frame, rects: &Vec<Rect>, app: &app::App) {
                     None => {}
                 }
 
+
                 let paragraph = Paragraph::new(file.contents.clone())
                     .style(Style::default().fg(Color::White))
                     .block(Block::bordered())
                     .scroll((app.scroll_value.try_into().unwrap(), 0));
 
-                let mut scroll_state;
-                if file.line_count > app.scroll_offset {
-                    scroll_state = app.file_view_scroll_state.content_length(file.line_count - app.scroll_offset);
-                }
-                else {
-                    scroll_state = app.file_view_scroll_state.content_length(file.line_count);
-                }
+                let mut scroll_state = match file.line_count > app.scroll_offset {
+                    true => {
+                        app.file_view_scroll_state.content_length(file.line_count - app.scroll_offset)
+                    },
+                    false => {
+                        app.file_view_scroll_state.content_length(file.line_count)
+                    }
+                };
                        
                 f.render_widget(paragraph, rects[1]);
                 render_scroll_bar(f, &rects[1], &mut scroll_state);
