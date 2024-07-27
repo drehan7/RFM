@@ -1,9 +1,10 @@
-use crate::{app, utils, syntax};
+use crate::{app, utils, syntax, filesystem};
 
 use std::fs::DirEntry;
 use ratatui::layout::Margin;
 use ratatui::symbols::scrollbar;
 use ratatui::text::{Line, Span};
+use ratatui::widgets::block::Title;
 use ratatui::widgets::{ListItem, Scrollbar, ScrollbarOrientation, ScrollbarState};
 use ratatui::{
     Frame,
@@ -39,6 +40,41 @@ fn displayable_path( entry: &DirEntry ) -> String {
     return unicode;
 }
 
+// Take in file contents and app, hightight file using syntect
+// Return paragraph containing highlighted text
+fn apply_syntax<'a>(app: &'a app::App, file: &'a filesystem::SelectedFile) -> Paragraph<'a> {
+    let syn_file = syntax::highlight_file(&app.syntax_helper, &file.path, &file.contents);
+
+    let mut syntax_lines = vec![];
+
+    for line in syn_file {
+        let mut combined_line: Vec<Span> = vec![];
+        for word in line {
+            let foreground = word.0.foreground;
+            let text = word.1;
+            let vv = Span::styled(text, Style::default()
+                .fg(Color::Rgb(foreground.r, foreground.g, foreground.b)));
+
+            combined_line.push(vv);
+        }
+
+        syntax_lines.push(
+                Line::from(combined_line)
+            );
+    }
+
+    let title = match file.path.to_str() {
+        Some(path) => path,
+        None => "" // No path?
+    };
+
+    Paragraph::new(syntax_lines)
+        .style(Style::default().fg(Color::White))
+        .block(Block::bordered()
+            .title(Title::from(title)))
+        .scroll((app.scroll_value.try_into().unwrap(), 0))
+}
+
 fn render_scroll_bar (f: &mut Frame, rect: &Rect, scroll_state: &mut ScrollbarState) {
     f.render_stateful_widget(
         Scrollbar::new(ScrollbarOrientation::VerticalRight)
@@ -61,17 +97,11 @@ fn render_header_block (f: &mut Frame, rect: &Rect, app: &app::App) {
 
     let mut lines = vec![];
     lines.push(Line::from(vec![
-            // Span::styled(app.title.to_owned(), Style::default().fg(Color::Green)),
             Span::styled(String::from(app.current_path.to_str().unwrap()), Style::default().fg(Color::Yellow))
     ]));
 
     let title = Paragraph::new(Text::from(lines)).block(title_block);
 
-    // let title = Paragraph::new(Text::styled(
-    //     app.title.to_owned(),
-    //     Style::default().fg(Color::Yellow),
-    // ))
-    // .block(title_block);
     f.render_widget(title, *rect);
 }
 
@@ -81,16 +111,8 @@ fn render_main_block(f: &mut Frame, rects: &Vec<Rect>, app: &app::App) {
         .map(|f| ListItem::new(displayable_path(f)))
         .collect();
 
-    // Display CWD above entries
-    // let file_view_header = app.current_path.clone()
-    //     .into_os_string()
-    //     .to_str()
-    //     .unwrap()
-    //     .to_owned();
-
     // Render entries
     let list = List::new(files)
-        // .block(Block::bordered().title(file_view_header))
         .block(Block::bordered())
         .style(Style::default().fg(Color::White))
         .highlight_style(Style::default()
@@ -104,17 +126,7 @@ fn render_main_block(f: &mut Frame, rects: &Vec<Rect>, app: &app::App) {
     if rects.len() > 1 {
         match &app.current_selected_file {
             Some(file) => {
-                match &file.file_ext {
-                    Some(_e) => {
-                    },
-                    None => {}
-                }
-
-
-                let paragraph = Paragraph::new(file.contents.clone())
-                    .style(Style::default().fg(Color::White))
-                    .block(Block::bordered())
-                    .scroll((app.scroll_value.try_into().unwrap(), 0));
+                let paragraph = apply_syntax(app, file);
 
                 let mut scroll_state = match file.line_count > app.scroll_offset {
                     true => {
@@ -128,7 +140,9 @@ fn render_main_block(f: &mut Frame, rects: &Vec<Rect>, app: &app::App) {
                 f.render_widget(paragraph, rects[1]);
                 render_scroll_bar(f, &rects[1], &mut scroll_state);
             }
-            None => {}
+            None => {
+                // No file selected 
+            }
         }
     }
 

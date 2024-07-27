@@ -13,6 +13,7 @@ use ratatui::Terminal;
 
 use crate::filesystem::{DirectoryList, SelectedFile};
 use crate::ui;
+use crate::syntax;
 
 #[derive(Debug, PartialEq)]
 pub enum AppState {
@@ -35,6 +36,7 @@ pub struct App {
     pub app_view: AppView,
     pub scroll_value: usize,
     pub scroll_offset: usize,
+    pub syntax_helper: syntax::Syntax,
 }
 
 impl App {
@@ -49,6 +51,7 @@ impl App {
             scroll_value: 0,
             file_view_scroll_state: ScrollbarState::default(),
             scroll_offset, 
+            syntax_helper: syntax::init_syntax(),
         }
     }
 
@@ -77,11 +80,7 @@ impl App {
         }
     }
 
-    fn handle_key_event(&mut self, key_event: event::KeyEvent) -> Result<()>{
-        // if let Event::Key(key) = event::read().unwrap() {
-        //     if key.kind == event::KeyEventKind::Release {
-        //     }
-
+    fn handle_key_event(&mut self, key_event: event::KeyEvent) -> Result<()> {
         match key_event.code {
             KeyCode::Char('q') => {
                 self.app_state = AppState::Quit;
